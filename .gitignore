@@ -1,0 +1,8 @@
+*.o
+*.hi
+*.out
+bin
+build
+obj
+hi
+dist
