@@ -6,7 +6,6 @@ version:             0.1.0.0
 synopsis:            Scheme interpreter written in Haskell.
 -- description:         
 homepage:            https://gitla.in/zukonake/myasitwac
-license:             MYASITWAC Public License
 license-file:        LICENSE
 author:              zukonake, Sans
 maintainer:          zukonake@protonmail.com
