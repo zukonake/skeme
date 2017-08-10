@@ -1,4 +1,4 @@
-module Value where
+module Value ( Value (..)) where
 
 data Value = Atom String
            | List [Value]
@@ -8,10 +8,13 @@ data Value = Atom String
            | Character Char
            | Bool Bool
 
+showListContents :: Show a => [a] -> String
+showListContents val = tail (foldr (++) [] (map ((++) " " . show) val))
+
 instance Show Value where
     show (Atom val) = val
-    show (List (x:xs)) = show x ++ ", " ++ show xs
-    show (DottedList (x:xs) val) = "TODO"
+    show (List val) = "(" ++ showListContents val ++ ")"
+    show (DottedList list val) = "(" ++ showListContents list ++ " . " ++ show val ++ ")"
     show (Number val) = show val
     show (String val) = val
     show (Character val) = [val]
