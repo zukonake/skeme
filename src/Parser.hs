@@ -12,10 +12,10 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 spaces :: Parser ()
 spaces = skipMany1 space
 
-readExpr :: String -> String
+readExpr :: String -> Value
 readExpr input = case parse parseExpr "lisp" input of
-    Left err -> "No match: " ++ show err
-    Right val -> show val
+    Left err -> String $ "No match: " ++ show err
+    Right val -> val
 
 parseAtom :: Parser Value
 parseAtom = do
@@ -63,8 +63,25 @@ parseCharacter = do
         "newline" -> (return . Character) '\n'
         _         -> (return . Character) (head val)
 
+parseList :: Parser Value
+parseList = fmap List $ sepBy parseExpr spaces
+
+parseDottedList :: Parser Value
+parseDottedList = do
+    head <- endBy parseExpr spaces
+    tail <- char '.' >> spaces >> parseExpr
+    return $ DottedList head tail
+
 parseExpr :: Parser Value
-parseExpr = try parseCharacter <|> try parseString <|> try parseInteger <|> try parseAtom
+parseExpr = try parseCharacter
+  <|> try parseString
+  <|> try parseInteger
+  <|> try parseAtom
+  <|> do
+    char '('
+    x <- try parseList <|> parseDottedList
+    char ')'
+    return x
 
 parseString :: Parser Value
 parseString = do

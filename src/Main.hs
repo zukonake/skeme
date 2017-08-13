@@ -1,6 +1,7 @@
 module Main where
 import System.IO
 import Parser
+import Eval
 
 main :: IO ()
 main = do
@@ -9,6 +10,6 @@ main = do
     input <- getLine
     if input == ":quit" || input == ":q"
         then putStrLn "Quitting..."
-        else do 
-            putStrLn $ readExpr input
+        else do
+            putStrLn $ show $ eval $ readExpr input
             main
