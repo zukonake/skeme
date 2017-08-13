@@ -8,13 +8,13 @@ data Value = Atom String
            | Character Char
            | Bool Bool
 
-showListContents :: Show a => [a] -> String
-showListContents val = tail (foldr (++) [] (map ((++) " " . show) val))
+unwordsList :: Show a => [a] -> String
+unwordsList = unwords . map show
 
 instance Show Value where
     show (Atom val) = val
-    show (List val) = "(" ++ showListContents val ++ ")"
-    show (DottedList list val) = "(" ++ showListContents list ++ " . " ++ show val ++ ")"
+    show (List val) = "(" ++ unwordsList val ++ ")"
+    show (DottedList list val) = "(" ++ unwordsList list ++ " . " ++ show val ++ ")"
     show (Number val) = show val
     show (String val) = val
     show (Character val) = [val]
