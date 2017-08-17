@@ -1,4 +1,7 @@
-module Value ( Value (..)) where
+{-# LANGUAGE DeriveDataTypeable #-}
+module Value ( Value (..), (===)) where
+import Data.Data
+import Data.Typeable
 
 data Value = Atom String
            | List [Value]
@@ -7,6 +10,10 @@ data Value = Atom String
            | String String
            | Character Char
            | Bool Bool
+           deriving (Eq, Typeable, Data)
+
+(===) :: Value -> Value -> Value
+(===) l r = Bool ((toConstr l) == (toConstr r))
 
 unwordsList :: Show a => [a] -> String
 unwordsList = unwords . map show
