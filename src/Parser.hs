@@ -64,24 +64,21 @@ parseCharacter = do
         _         -> (return . Character) (head val)
 
 parseList :: Parser Value
-parseList = fmap List $ sepBy parseExpr spaces
-
-parseDottedList :: Parser Value
-parseDottedList = do
-    head <- endBy parseExpr spaces
-    tail <- char '.' >> spaces >> parseExpr
-    return $ DottedList head tail
+parseList = do
+    quote <- optionMaybe $ char '\''
+    char '('
+    val <- sepBy parseExpr spaces
+    char ')'
+    if quote == Nothing
+        then return $ List val
+        else return $ List $ [Atom "quote", List val]
 
 parseExpr :: Parser Value
 parseExpr = try parseCharacter
-  <|> try parseString
-  <|> try parseInteger
-  <|> try parseAtom
-  <|> do
-    char '('
-    x <- try parseList <|> parseDottedList
-    char ')'
-    return x
+    <|> try parseString
+    <|> try parseInteger
+    <|> try parseAtom
+    <|> try parseList
 
 parseString :: Parser Value
 parseString = do

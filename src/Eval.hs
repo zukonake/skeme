@@ -20,19 +20,23 @@ apply :: String -> [Value] -> Value
 apply func args = maybe (Bool False) ($ args) $ lookup func primitives
 
 car :: Value -> Value
+--car [] = TODO error
 car (List (x:xs)) = x
+
 cdr :: Value -> Value
+--cdr [] = TODO error
 cdr (List (_:xs)) = List xs
+
 listPrimitives = [("car", unaryOp car),
                   ("cdr", unaryOp cdr)]
 
 numberPrimitives = [("+", numericBinop (+)),
-              ("-", numericBinop (-)),
-              ("*", numericBinop (*)),
-              ("/", numericBinop div),
-              ("mod", numericBinop mod),
-              ("quotient", numericBinop quot),
-              ("remainder", numericBinop rem)]
+                    ("-", numericBinop (-)),
+                    ("*", numericBinop (*)),
+                    ("/", numericBinop div),
+                    ("mod", numericBinop mod),
+                    ("quotient", numericBinop quot),
+                    ("remainder", numericBinop rem)]
 
 symbolPredicate = (===) (Atom "")
 symbol2string (Atom str) = String str
