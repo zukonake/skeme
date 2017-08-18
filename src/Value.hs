@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module Value ( Value (..), (===)) where
+
+module Value (Value (..), (===)) where
+
 import Data.Data
 import Data.Typeable
 

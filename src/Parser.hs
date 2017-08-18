@@ -1,10 +1,9 @@
-module Parser where
+module Parser (readExpr) where
 
 import Numeric
 import System.Environment
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Value
-
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"

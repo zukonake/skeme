@@ -1,4 +1,4 @@
-module Eval where
+module Eval (eval) where
 
 import Value
 import Parser
@@ -12,48 +12,62 @@ eval val@(Bool _) = val
 eval val@(Atom _) = val
 eval val@(Character _) = val
 eval (List [Atom "quote", val]) = val
-
 -- unquoted lists are function applications
 --  and eval to the result of the application
 eval (List (Atom func : args)) = apply func $ map eval args
+--eval _ = TODO error
+
 apply :: String -> [Value] -> Value
 apply func args = maybe (Bool False) ($ args) $ lookup func primitives
 
 car :: Value -> Value
---car [] = TODO error
-car (List (x:xs)) = x
+--car _ = TODO error
+car (List (x:_)) = x
 
 cdr :: Value -> Value
---cdr [] = TODO error
+--cdr _ = TODO error
 cdr (List (_:xs)) = List xs
 
+type Primitive = (String, [Value] -> Value)
+
+listPrimitives :: [Primitive]
 listPrimitives = [("car", unaryOp car),
                   ("cdr", unaryOp cdr)]
 
-numberPrimitives = [("+", numericBinop (+)),
-                    ("-", numericBinop (-)),
-                    ("*", numericBinop (*)),
-                    ("/", numericBinop div),
-                    ("mod", numericBinop mod),
-                    ("quotient", numericBinop quot),
-                    ("remainder", numericBinop rem)]
+numberPrimitives :: [Primitive]
+numberPrimitives = [("+", numericBinOp (+)),
+                    ("-", numericBinOp (-)),
+                    ("*", numericBinOp (*)),
+                    ("/", numericBinOp div),
+                    ("mod", numericBinOp mod),
+                    ("quotient", numericBinOp quot),
+                    ("remainder", numericBinOp rem)]
 
-symbolPredicate = (===) (Atom {})
-symbol2string (Atom str) = String str
-symbolPrimitives :: [(String, [Value] -> Value)]
-symbolPrimitives = [("symbol?", unaryOp symbolPredicate),
-                    ("symbol->string", unaryOp symbol2string)]
+symbolToString :: Value -> Value
+symbolToString (Atom str) = String str
+--symbolToString _ = TODO error
 
+typePrimitives :: [Primitive]
+typePrimitives = [("symbol?", unaryOp $ (===) Atom {}),
+                  ("list?", unaryOp $ (===) List {}),
+                  ("number?", unaryOp $ (===) Number {}),
+                  ("string?", unaryOp $ (===) String {}),
+                  ("character?", unaryOp $ (===) Character {}),
+                  ("bool?", unaryOp $ (===) Bool {}),
+                  ("symbol->string", unaryOp symbolToString)]
+
+primitives :: [Primitive]
 primitives = numberPrimitives ++
-             symbolPrimitives ++
+             typePrimitives ++
              listPrimitives
 
 unaryOp :: (Value -> Value) -> [Value] -> Value
 unaryOp op [x] = op x
---unaryOp op xs = TODO error or something
+--unaryOp op _ = TODO error or something
 
-numericBinop :: (Integer -> Integer -> Integer) -> [Value] -> Value
-numericBinop op params = Number $ foldl1 op $ map unpackNum params
+numericBinOp :: (Integer -> Integer -> Integer) -> [Value] -> Value
+numericBinOp op params = Number $ foldl1 op $ map unpackNum params
 
 unpackNum :: Value -> Integer
 unpackNum (Number n) = n
+--unpackNum _ = TODO error
