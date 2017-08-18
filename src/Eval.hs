@@ -38,7 +38,7 @@ numberPrimitives = [("+", numericBinop (+)),
                     ("quotient", numericBinop quot),
                     ("remainder", numericBinop rem)]
 
-symbolPredicate = (===) (Atom "")
+symbolPredicate = (===) (Atom {})
 symbol2string (Atom str) = String str
 symbolPrimitives :: [(String, [Value] -> Value)]
 symbolPrimitives = [("symbol?", unaryOp symbolPredicate),
