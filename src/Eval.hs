@@ -1,9 +1,9 @@
 module Eval (eval) where
 
 import Value
-import Parser
+import LangError
 
-eval :: Value -> Value
+eval :: Value -> ThrowsError Value
 
 -- things that eval to themselves: all atoms and quoted things
 eval val@(String _) = val
@@ -15,20 +15,21 @@ eval (List [Atom "quote", val]) = val
 -- unquoted lists are function applications
 --  and eval to the result of the application
 eval (List (Atom func : args)) = apply func $ map eval args
---eval _ = TODO error
+eval badform = throwError $ BadSpecialForm "Unrecognized special form" badForm
 
-apply :: String -> [Value] -> Value
-apply func args = maybe (Bool False) ($ args) $ lookup func primitives
+apply :: String -> [Value] -> ThrowsError Value
+apply func args = maybe (throwError $ NotFunction "Unrecognized primitive function args" func) 
+                        ($ args) $ lookup func primitives
 
-car :: Value -> Value
---car _ = TODO error
+car :: Value -> ThrowsError Value
 car (List (x:_)) = x
+car = notOfType "List" 
 
-cdr :: Value -> Value
---cdr _ = TODO error
+cdr :: Value -> ThrowsError Value
 cdr (List (_:xs)) = List xs
+cdr = notOfType "List"
 
-type Primitive = (String, [Value] -> Value)
+type Primitive = (String, [Value] -> ThrowsError Value)
 
 listPrimitives :: [Primitive]
 listPrimitives = [("car", unaryOp car),
@@ -43,9 +44,12 @@ numberPrimitives = [("+", numericBinOp (+)),
                     ("quotient", numericBinOp quot),
                     ("remainder", numericBinOp rem)]
 
-symbolToString :: Value -> Value
+symbolToString :: Value -> ThrowsError Value
 symbolToString (Atom str) = String str
---symbolToString _ = TODO error
+symbolToString notSym = throwError $ TypeMismatch "symbol" (show $ toConstr notSym)
+
+
+notOfType typeName val = throwError $ TypeMismatch typeName (show $ toConstr val)
 
 typePrimitives :: [Primitive]
 typePrimitives = [("symbol?", unaryOp $ (===) Atom {}),
@@ -61,13 +65,13 @@ primitives = numberPrimitives ++
              typePrimitives ++
              listPrimitives
 
-unaryOp :: (Value -> Value) -> [Value] -> Value
-unaryOp op [x] = op x
---unaryOp op _ = TODO error or something
+unaryOp :: (Value -> Value) -> [Value] -> ThrowsError Value
+unaryOp op [x] = return $ op x
+unaryOp op list = throwError $ NumArgs 1 (length list)
 
-numericBinOp :: (Integer -> Integer -> Integer) -> [Value] -> Value
-numericBinOp op params = Number $ foldl1 op $ map unpackNum params
+numericBinOp :: (Integer -> Integer -> Integer) -> [Value] -> ThrowsError Value 
+numericBinOp op params = return $ Number $ foldl1 op $ map unpackNum params
 
-unpackNum :: Value -> Integer
-unpackNum (Number n) = n
---unpackNum _ = TODO error
+unpackNum :: Value -> ThrowsError Integer
+unpackNum (Number n) = return n
+unpackNum notNum = throwError $ TypeMismatch (show $ toConstr Number {}) notNum

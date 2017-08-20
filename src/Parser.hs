@@ -1,9 +1,9 @@
 module Parser (readExpr) where
 
 import Numeric
-import System.Environment
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Value
+import LangError
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
@@ -11,9 +11,9 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 spaces :: Parser ()
 spaces = skipMany1 space
 
-readExpr :: String -> Value
+readExpr :: String -> ThrowsError Value
 readExpr input = case parse parseExpr "lisp" input of
-    Left err -> String $ "No match: " ++ show err
+    Left err -> throwError $ Parser err
     Right val -> val
 
 parseAtom :: Parser Value
