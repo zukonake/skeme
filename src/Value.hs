@@ -3,6 +3,7 @@
 module Value (Value (..), (===)) where
 
 import Data.Data
+import Data.Typeable
 
 data Value = Atom String
            | List [Value]

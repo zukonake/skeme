@@ -4,6 +4,7 @@ import Numeric
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Value
 import LangError
+import Control.Monad.Error
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
@@ -14,7 +15,7 @@ spaces = skipMany1 space
 readExpr :: String -> ThrowsError Value
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> throwError $ Parser err
-    Right val -> val
+    Right val -> return val
 
 parseAtom :: Parser Value
 parseAtom = do
