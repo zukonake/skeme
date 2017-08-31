@@ -15,22 +15,33 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable myasitwac
-  main-is:             Main.hs
-  -- other-modules:       
-  -- other-extensions:    
+library
+  exposed-modules:     Value, Parser, LangError
+  hs-source-dirs:      src
   build-depends:       base >=4.9 && <4.10
                      , parsec
                      , mtl >=2.2.1 && <=2.2.1
-  hs-source-dirs:      src
-  default-language:    Haskell2010
   ghc-options:         -dynamic -Wall -fno-warn-unused-do-bind
+  default-language:    Haskell2010
 
-executable test
+executable myasitwac
+  hs-source-dirs:      src
+
   main-is:             Main.hs
   build-depends:       base >=4.9 && <4.10
+                     , parsec
+                     , mtl >=2.2.1 && <=2.2.1
+                     , myasitwac
+
+  default-language:    Haskell2010
+
+test-suite test
+  type:                exitcode-stdio-1.0
+  main-is:             Spec.hs
+  build-depends:       base >=4.9 && <4.10
                      , hspec
+                     , QuickCheck
+                     , myasitwac
   hs-source-dirs:      test
   default-language:    Haskell2010
   ghc-options:         -dynamic -Wall -fno-warn-unused-do-bind
-                       
