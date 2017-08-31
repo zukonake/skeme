@@ -27,6 +27,7 @@ instance Error LangError where
 
 type ThrowsError = Either LangError
 
+trapError :: (Show a, MonadError a m) => m String -> m String
 trapError action = catchError action (return . show)
 
 extractValue :: ThrowsError a -> a
