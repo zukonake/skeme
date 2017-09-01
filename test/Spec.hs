@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module Main where
 
   import Test.Hspec
@@ -6,14 +7,32 @@ module Main where
   import Parser (readExpr)
   import Value
   import LangError
+  import Eval
 
-  type SpecDef = (String, String, Value)
+  class SpecLike a where
+    toSpec :: a -> Spec
 
-  specs :: [SpecDef]
-  specs = [
+  type ParseSpecDef = (String, String, Value)
+  type EvalSpecDef = (String, Value, Value)
+
+  instance SpecLike [ParseSpecDef] where
+    toSpec specdefs =
+      foldl1 (>>) $ map parseToSpec specdefs
+        where parseToSpec (name, input, output) =
+                it name $ extractValue (readExpr input) `shouldBe` output
+
+  instance SpecLike [EvalSpecDef] where
+    toSpec specdefs =
+      foldl1 (>>) $ map evalToSpec specdefs
+        where evalToSpec (name, input, output) =
+                it name $ extractValue (eval input) `shouldBe` output
+
+  primitiveSpecs :: [ParseSpecDef]
+  primitiveSpecs = [
       ("Number", "23", Number 23),
       ("String", "\"abc\"", String "abc"),
       ("Atom", "atm", Atom "atm"),
+      ("Function Application", "(func 1 2 3)", List [Atom "func", Number 1, Number 2, Number 3]),
       ("List", "(1 2 3)", List [Number 1, Number 2, Number 3]),
       ("Quoted List", "'(1 2 3)", List [Atom "quote", List [Number 1, Number 2, Number 3]]),
       ("Character", "#\\c", Character 'c'),
@@ -23,9 +42,30 @@ module Main where
       ("Boolean.False", "#f", Bool False)
     ]
 
-  toSpec :: SpecDef -> SpecWith ()
-  toSpec (name, input, output) = it name $
-    extractValue (readExpr input) `shouldBe` output
+  evalSpecs :: [EvalSpecDef]
+  evalSpecs = [
+      ("Plus",     List [Atom "+", Number 1, Number 2],          Number 3),
+      ("Minus",    List [Atom "-", Number 1, Number 2],          Number (-1)),
+      ("Times",    List [Atom "*", Number 3, Number 2],          Number 6),
+      ("Divide",   List [Atom "/", Number 23, Number 3],         Number 7),
+      ("Modulo",   List [Atom "mod", Number 22, Number 3],       Number 1),
+      ("Quotient", List [Atom "quotient", Number 22, Number 3],  Number 7),
+      ("Remainder",List [Atom "remainder", Number 22, Number 3], Number 1)
+    ]
+
+  typeSpecs :: [EvalSpecDef]
+  typeSpecs = [
+      ("Symbol predicate", List [Atom "symbol?", Atom "a"], Bool True),
+      ("List predicate",   List [Atom "list?", List [Atom "quote", List []]], Bool True),
+      ("Number predicate", List [Atom "number?", Number 1], Bool True),
+      ("String predicate", List [Atom "string?", String "a"], Bool True),
+      ("Char predicate",   List [Atom "character?", Character 'c'], Bool True),
+      ("Bool predicate",   List [Atom "bool?", Bool True], Bool True),
+      ("Symbol->String",   List [Atom "symbol->string", Atom "abc"], String "abc")
+    ]
 
   main :: IO ()
-  main = hspec $ describe "Parsing" $ foldl1 (>>) $ map toSpec specs
+  main = hspec $ describe "Parsing" $
+    toSpec primitiveSpecs >>
+    toSpec evalSpecs >>
+    toSpec typeSpecs

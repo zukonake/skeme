@@ -15,7 +15,7 @@ eval val@(Character _) = return val
 eval (List [Atom "quote", val]) = return val
 -- unquoted lists are function applications
 --  and eval to the result of the application
-eval (List (Atom func : args)) = mapM eval args >>= apply func 
+eval (List (Atom func : args)) = mapM eval args >>= apply func
 eval badform = throwError $ BadSpecialForm "Unrecognized special form" badform
 
 apply :: String -> [Value] -> ThrowsError Value
@@ -72,7 +72,7 @@ primitives = numberPrimitives ++
 
 unaryOp :: (Value -> ThrowsError Value) -> [Value] -> ThrowsError Value
 unaryOp op [x] = op x
-unaryOp op list = throwError $ NumArgs 1 list
+unaryOp _ list = throwError $ NumArgs 1 list
 
 
 numericBinOp :: (Integer -> Integer -> Integer) -> [Value] -> ThrowsError Value

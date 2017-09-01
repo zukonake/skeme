@@ -16,7 +16,7 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Value, Parser, LangError
+  exposed-modules:     Value, Parser, LangError, Eval
   hs-source-dirs:      src
   build-depends:       base >=4.9 && <4.10
                      , parsec
