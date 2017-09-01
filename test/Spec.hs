@@ -11,8 +11,16 @@ module Main where
 
   specs :: [SpecDef]
   specs = [
-      ("Number", "23", Number 24),
-      ("String", "\"abc\"", String "abc")
+      ("Number", "23", Number 23),
+      ("String", "\"abc\"", String "abc"),
+      ("Atom", "atm", Atom "atm"),
+      ("List", "(1 2 3)", List [Number 1, Number 2, Number 3]),
+      ("Quoted List", "'(1 2 3)", List [Atom "quote", List [Number 1, Number 2, Number 3]]),
+      ("Character", "#\\c", Character 'c'),
+      ("Character.Space", "#\\space", Character ' '),
+      ("Character.Newline", "#\\newline", Character '\n'),
+      ("Boolean.True", "#t", Bool True),
+      ("Boolean.False", "#f", Bool False)
     ]
 
   toSpec :: SpecDef -> SpecWith ()
