@@ -27,8 +27,8 @@ module Main where
         where evalToSpec (name, input, output) =
                 it name $ extractValue (eval input) `shouldBe` output
 
-  primitiveSpecs :: [ParseSpecDef]
-  primitiveSpecs = [
+  parseSpecs :: [ParseSpecDef]
+  parseSpecs = [
       ("Number", "23", Number 23),
       ("String", "\"abc\"", String "abc"),
       ("Atom", "atm", Atom "atm"),
@@ -42,8 +42,8 @@ module Main where
       ("Boolean.False", "#f", Bool False)
     ]
 
-  evalSpecs :: [EvalSpecDef]
-  evalSpecs = [
+  primitiveSpecs :: [EvalSpecDef]
+  primitiveSpecs = [
       ("Plus",     List [Atom "+", Number 1, Number 2],          Number 3),
       ("Minus",    List [Atom "-", Number 1, Number 2],          Number (-1)),
       ("Times",    List [Atom "*", Number 3, Number 2],          Number 6),
@@ -53,9 +53,9 @@ module Main where
       ("Remainder",List [Atom "remainder", Number 22, Number 3], Number 1)
     ]
 
-  typeSpecs :: [EvalSpecDef]
-  typeSpecs = [
-      ("Symbol predicate", List [Atom "symbol?", Atom "a"], Bool True),
+  predicateSpecs :: [EvalSpecDef]
+  predicateSpecs = [
+      ("Symbol predicate", List [Atom "symbol?", Atom "a"], Bool False),
       ("List predicate",   List [Atom "list?", List [Atom "quote", List []]], Bool True),
       ("Number predicate", List [Atom "number?", Number 1], Bool True),
       ("String predicate", List [Atom "string?", String "a"], Bool True),
@@ -65,7 +65,7 @@ module Main where
     ]
 
   main :: IO ()
-  main = hspec $ describe "Parsing" $
-    toSpec primitiveSpecs >>
-    toSpec evalSpecs >>
-    toSpec typeSpecs
+  main = hspec $
+    describe "Parse"     (toSpec parseSpecs)     >>
+    describe "Primitive" (toSpec primitiveSpecs) >>
+    describe "Predicate" (toSpec predicateSpecs)
