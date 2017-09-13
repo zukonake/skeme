@@ -20,6 +20,7 @@ instance Show LangError where
     show (TypeMismatch expected found) = "Invalid type: expected " ++ expected
                                            ++ ", found " ++ show found
     show (Parser parseErr)             = "Parse error at " ++ show parseErr
+    show (Default message)             = message
 
 instance Error LangError where
      noMsg = Default "An error has occurred"
@@ -32,3 +33,4 @@ trapError action = catchError action (return . show)
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
+--TODO warning

@@ -2,7 +2,7 @@ module Eval (eval) where
 
 import Value
 import LangError
-import Control.Monad.Error
+import Control.Monad.Except
 
 eval :: Value -> ThrowsError Value
 

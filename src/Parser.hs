@@ -4,7 +4,7 @@ import Numeric
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Value
 import LangError
-import Control.Monad.Error
+import Control.Monad.Except
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
