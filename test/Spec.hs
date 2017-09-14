@@ -59,8 +59,8 @@ module Main where
       ("&&", List [Atom "&&", Bool True, Bool False], Bool False),
       ("||", List [Atom "||", Bool True, Bool False], Bool True),
 
-      ("car", List [Atom "car", List [Number 1, Number 2, Number 3]], Number 1),
-      ("cdr", List [Atom "cdr", List [Number 1, Number 2, Number 3]], List [Number 2, Number 3]),
+      ("car", List [Atom "car", List [Atom "quote", List [Number 1, Number 2, Number 3]]], Number 1),
+      ("cdr", List [Atom "cdr", List [Atom "quote", List [Number 1, Number 2, Number 3]]], List [Number 2, Number 3]),
 
       ("If", List [Atom "if",
         List [Atom ">", Number 3, Number 2],
