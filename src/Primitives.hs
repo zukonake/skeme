@@ -44,8 +44,8 @@ typePrimitives = [("symbol?", unaryOp unpackValue id $ (===) Atom {}),
                   ("symbol->string", unaryOp unpackAtom String id)]
 
 lispIf :: Primitive
-lispIf [Bool True, true, false] = return $ true
-lispIf [Bool False, true, false] = return $ false
+lispIf [Bool True, val, _] = return $ val
+lispIf [Bool False, _, val] = return $ val
 lispIf (nonBool:_) = notOfType "Bool" nonBool
 lispIf args = throwError $ NumArgs 3 args
 
