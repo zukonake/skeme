@@ -28,6 +28,14 @@ listPrimitives :: [Primitive]
 listPrimitives = [("car", unaryOp unpackList id head),
                   ("cdr", unaryOp unpackList List tail)]
 
+booleanPrimitives :: [Primitive]
+booleanPrimitives = [("<", binOp unpackNum Bool (<)),
+                     (">", binOp unpackNum Bool (>)),
+                     ("<=", binOp unpackNum Bool (<=)),
+                     (">=", binOp unpackNum Bool (>=)),
+                     ("&&", binOp unpackBool Bool (&&)),
+                     ("||", binOp unpackBool Bool (||))]
+
 numberPrimitives :: [Primitive]
 numberPrimitives = [("+", binOp unpackNum Number (+)),
                     ("-", binOp unpackNum Number (-)),
@@ -49,7 +57,8 @@ typePrimitives = [("symbol?", unaryOp unpackValue id $ (===) Atom {}),
 primitives :: [Primitive]
 primitives = numberPrimitives ++
              typePrimitives ++
-             listPrimitives
+             listPrimitives ++
+             booleanPrimitives
 
 type Unpacker a = (Value -> ThrowsError a)
 type Packer a = (a -> Value)
@@ -68,6 +77,10 @@ unpackValue = return
 unpackNum :: Unpacker Integer
 unpackNum (Number n) = return n
 unpackNum notNum = notOfType "number" notNum
+
+unpackBool :: Unpacker Bool
+unpackBool (Bool n) = return n
+unpackBool notBool = notOfType "Bool" notBool
 
 unpackAtom :: Unpacker String
 unpackAtom (Atom n) = return n
