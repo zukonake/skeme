@@ -37,9 +37,6 @@ numberPrimitives = [("+", binOp unpackNum Number (+)),
                     ("quotient", binOp unpackNum Number quot),
                     ("remainder", binOp unpackNum Number rem)]
 
-notOfType :: String -> Value -> ThrowsError Value
-notOfType typeName val = throwError $ TypeMismatch typeName val
-
 typePrimitives :: [Primitive]
 typePrimitives = [("symbol?", unaryOp unpackValue id $ (===) Atom {}),
                   ("list?", unaryOp unpackValue id $ (===) List {}),
@@ -70,12 +67,12 @@ unpackValue = return
 
 unpackNum :: Unpacker Integer
 unpackNum (Number n) = return n
-unpackNum notNum = throwError $ TypeMismatch "number" notNum
+unpackNum notNum = notOfType "number" notNum
 
 unpackAtom :: Unpacker String
 unpackAtom (Atom n) = return n
-unpackAtom notAtom = throwError $ TypeMismatch "Atom" notAtom
+unpackAtom notAtom = notOfType "Atom" notAtom
 
 unpackList :: Unpacker [Value]
 unpackList (List a) = return a
-unpackList notList = throwError $ TypeMismatch "List" notList
+unpackList notList = notOfType "List" notList

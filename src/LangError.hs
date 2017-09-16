@@ -34,3 +34,6 @@ trapError action = catchError action (return . show)
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
 --TODO warning
+
+notOfType :: String -> Value -> ThrowsError a
+notOfType typeName val = notOfType typeName val
