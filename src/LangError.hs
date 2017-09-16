@@ -36,4 +36,4 @@ extractValue (Right val) = val
 --TODO warning
 
 notOfType :: String -> Value -> ThrowsError a
-notOfType typeName val = notOfType typeName val
+notOfType typeName val = throwError $ TypeMismatch typeName val
