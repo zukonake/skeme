@@ -19,9 +19,9 @@ unwordsList :: Show a => [a] -> String
 unwordsList = unwords . map show
 
 instance Show Value where
-    show (Atom val) = val ++ " ; Atom"
-    show (List val) = "(" ++ unwordsList val ++ ") ; List"
-    show (Number val) = show val ++ " ; Number"
-    show (String val) = val ++ " ; String"
-    show (Character val) = [val] ++ " ; Character"
-    show (Bool val) = show val ++ " ; Bool"
+    show (Atom val) = val
+    show (List val) = "(" ++ unwordsList val ++ ")"
+    show (Number val) = show val
+    show (String val) = val
+    show (Character val) = [val]
+    show (Bool val) = show val

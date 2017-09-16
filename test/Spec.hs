@@ -61,8 +61,8 @@ module Main where
 
       ("car", List [Atom "car", List [Atom "quote", List [Number 1, Number 2, Number 3]]], Number 1),
       ("cdr", List [Atom "cdr", List [Atom "quote", List [Number 1, Number 2, Number 3]]], List [Number 2, Number 3]),
-      ("cons", List [Atom "cons", List [Atom "quote", List [Number 1]], List [Atom "quote", List []]], List [Number 1]),
-      ("cons", List [Atom "cons", List [Atom "quote", List [Number 1]], List [Atom "quote", List [Number 2]]], List [Number 1, Number 2]),
+      ("cons", List [Atom "cons", List [Atom "quote", Number 1], List [Atom "quote", List []]], List [Number 1]),
+      ("cons", List [Atom "cons", List [Atom "quote", Number 1], List [Atom "quote", List [Number 2]]], List [Number 1, Number 2]),
 
 
       ("If", List [Atom "if",
