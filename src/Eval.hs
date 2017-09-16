@@ -22,62 +22,60 @@ apply :: String -> [Value] -> ThrowsError Value
 apply func args = maybe (throwError $ NotFunction "Unrecognized primitive function args" func)
                         ($ args) $ lookup func primitives
 
-car :: Value -> ThrowsError Value
-car (List (x:_)) = return x
-car v = notOfType "List" v
-
-cdr :: Value -> ThrowsError Value
-cdr (List (_:xs)) = return $ List xs
-cdr v = notOfType "List" v
-
 type Primitive = (String, [Value] -> ThrowsError Value)
 
 listPrimitives :: [Primitive]
-listPrimitives = [("car", unaryOp car),
-                  ("cdr", unaryOp cdr)]
+listPrimitives = [("car", unaryOp unpackList id head),
+                  ("cdr", unaryOp unpackList List tail)]
 
 numberPrimitives :: [Primitive]
-numberPrimitives = [("+", numericBinOp (+)),
-                    ("-", numericBinOp (-)),
-                    ("*", numericBinOp (*)),
-                    ("/", numericBinOp div),
-                    ("mod", numericBinOp mod),
-                    ("quotient", numericBinOp quot),
-                    ("remainder", numericBinOp rem)]
-
-symbolToString :: Value -> ThrowsError Value
-symbolToString (Atom str) = return $ String str
-symbolToString notSym = throwError $ TypeMismatch "symbol" notSym
-
+numberPrimitives = [("+", binOp unpackNum Number (+)),
+                    ("-", binOp unpackNum Number (-)),
+                    ("*", binOp unpackNum Number (*)),
+                    ("/", binOp unpackNum Number div),
+                    ("mod", binOp unpackNum Number mod),
+                    ("quotient", binOp unpackNum Number quot),
+                    ("remainder", binOp unpackNum Number rem)]
 
 notOfType :: String -> Value -> ThrowsError Value
 notOfType typeName val = throwError $ TypeMismatch typeName val
 
-monadicEquals :: Value -> Value -> ThrowsError Value
-monadicEquals val1 val2 = return $ (===) val1 val2
-
 typePrimitives :: [Primitive]
-typePrimitives = [("symbol?", unaryOp $ monadicEquals $ Atom {}),
-                  ("list?", unaryOp $ monadicEquals $ List {}),
-                  ("number?", unaryOp $ monadicEquals $ Number {}),
-                  ("string?", unaryOp $ monadicEquals $ String {}),
-                  ("character?", unaryOp $ monadicEquals $ Character {}),
-                  ("bool?", unaryOp $ monadicEquals $ Bool {}),
-                  ("symbol->string", unaryOp symbolToString)]
+typePrimitives = [("symbol?", unaryOp unpackValue id $ (===) Atom {}),
+                  ("list?", unaryOp unpackValue id $ (===) List {}),
+                  ("number?", unaryOp unpackValue id $ (===) Number {}),
+                  ("string?", unaryOp unpackValue id $ (===) String {}),
+                  ("character?", unaryOp unpackValue id $ (===) Character {}),
+                  ("bool?", unaryOp unpackValue id $ (===) Bool {}),
+                  ("symbol->string", unaryOp unpackAtom String id)]
 
 primitives :: [Primitive]
 primitives = numberPrimitives ++
              typePrimitives ++
              listPrimitives
 
-unaryOp :: (Value -> ThrowsError Value) -> [Value] -> ThrowsError Value
-unaryOp op [x] = op x
-unaryOp _ list = throwError $ NumArgs 1 list
+type Unpacker a = (Value -> ThrowsError a)
+type Packer a = (a -> Value)
 
+binOp :: Unpacker a -> Packer b -> (a -> a -> b) -> [Value] -> ThrowsError Value
+binOp unpacker packer op (x1:x2:[]) = fmap packer $ liftM2 op (unpacker x1) (unpacker x2)
+binOp _ _ _ list = throwError $ NumArgs 2 list
 
-numericBinOp :: (Integer -> Integer -> Integer) -> [Value] -> ThrowsError Value
-numericBinOp op params = fmap Number $ foldl1 (liftM2 op) $ map unpackNum params
+unaryOp :: Unpacker a -> Packer b -> (a -> b) -> [Value] -> ThrowsError Value
+unaryOp unpacker packer op (x:[]) = fmap packer $ liftM op (unpacker x)
+unaryOp _ _ _ list = throwError $ NumArgs 1 list
 
-unpackNum :: Value -> ThrowsError Integer
+unpackValue :: Unpacker Value
+unpackValue = return
+
+unpackNum :: Unpacker Integer
 unpackNum (Number n) = return n
 unpackNum notNum = throwError $ TypeMismatch "number" notNum
+
+unpackAtom :: Unpacker String
+unpackAtom (Atom n) = return n
+unpackAtom notAtom = throwError $ TypeMismatch "Atom" notAtom
+
+unpackList :: Unpacker [Value]
+unpackList (List a) = return a
+unpackList notList = throwError $ TypeMismatch "List" notList
