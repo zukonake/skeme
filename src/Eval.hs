@@ -25,7 +25,6 @@ apply func args = maybe (throwError $ NotFunction "Unrecognized primitive functi
 type Primitive = (String, [Value] -> ThrowsError Value)
 
 cons :: [Value] -> ThrowsError Value
-cons [x, List []] = return $ List [x]
 cons [x, List xs] = return $ List $ x:xs
 cons [_, notList] = notOfType "List" notList
 cons args = throwError $ NumArgs 2 args
