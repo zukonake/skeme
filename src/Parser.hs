@@ -19,13 +19,16 @@ readExpr input = case parse parseExpr "lisp" input of
 
 parseAtom :: Parser Value
 parseAtom = do
+    quote <- optionMaybe $ char '\''
     first <- letter <|> symbol
     rest <- many (letter <|> symbol <|> digit)
     let atom = first:rest
     return $ case atom of
         "#t" -> Bool True
         "#f" -> Bool False
-        _ -> Atom atom
+        _ -> if quote == Nothing
+                 then Atom atom
+                 else List $ [Atom "quote", Atom atom]
 
 readBin :: Integral a => String -> a
 readBin [] = 0
